@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_pantry">
+
+    <fragment
+        android:id="@+id/nav_pantry"
+        android:name="com.example.smartpantry.ui.fragments.PantryFragment"
+        android:label="@string/tab_pantry" />
+
+    <fragment
+        android:id="@+id/nav_recipes"
+        android:name="com.example.smartpantry.ui.fragments.RecipesFragment"
+        android:label="@string/tab_recipes" />
+
+    <fragment
+        android:id="@+id/nav_chat"
+        android:name="com.example.smartpantry.ui.fragments.ChatFragment"
+        android:label="@string/tab_chat" />
+
+</navigation>

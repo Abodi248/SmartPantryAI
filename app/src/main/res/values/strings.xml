@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">SmartPantry AI</string>
+
+    <!-- Bottom nav tab labels -->
+    <string name="tab_pantry">Pantry</string>
+    <string name="tab_recipes">Recipes</string>
+    <string name="tab_chat">Chat</string>
+
+    <!-- Empty state messages -->
+    <string name="empty_pantry_message">Your pantry is empty.\nTap + to add ingredients.</string>
+    <string name="empty_recipes_message">No recipes yet.\nAdd ingredients to your pantry first.</string>
+    <string name="empty_chat_message">Ask me anything about cooking!</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_pantry_icon">Pantry</string>
+    <string name="cd_recipes_icon">Recipes</string>
+    <string name="cd_chat_icon">Chat</string>
+</resources>

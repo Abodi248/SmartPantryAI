@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_pantry"
+        android:icon="@drawable/ic_nav_pantry"
+        android:title="@string/tab_pantry"
+        android:contentDescription="@string/cd_pantry_icon" />
+
+    <item
+        android:id="@+id/nav_recipes"
+        android:icon="@drawable/ic_nav_recipes"
+        android:title="@string/tab_recipes"
+        android:contentDescription="@string/cd_recipes_icon" />
+
+    <item
+        android:id="@+id/nav_chat"
+        android:icon="@drawable/ic_nav_chat"
+        android:title="@string/tab_chat"
+        android:contentDescription="@string/cd_chat_icon" />
+
+</menu>
