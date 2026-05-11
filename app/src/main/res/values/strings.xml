@@ -11,8 +11,27 @@
     <string name="empty_recipes_message">No recipes yet.\nAdd ingredients to your pantry first.</string>
     <string name="empty_chat_message">Ask me anything about cooking!</string>
 
+    <!-- Dialog titles -->
+    <string name="dialog_add_ingredient_title">Add Ingredient</string>
+    <string name="dialog_edit_ingredient_title">Edit Ingredient</string>
+
+    <!-- Dialog field hints -->
+    <string name="hint_ingredient_name">Name *</string>
+    <string name="hint_ingredient_quantity">Quantity</string>
+    <string name="hint_ingredient_unit">Unit (e.g. cups, g, ml)</string>
+
+    <!-- Dialog actions -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+
+    <!-- Validation messages -->
+    <string name="error_name_required">Name is required</string>
+
     <!-- Content descriptions -->
     <string name="cd_pantry_icon">Pantry</string>
     <string name="cd_recipes_icon">Recipes</string>
     <string name="cd_chat_icon">Chat</string>
+    <string name="cd_add_ingredient">Add ingredient</string>
+    <string name="cd_edit_ingredient">Edit ingredient</string>
+    <string name="cd_delete_ingredient">Delete ingredient</string>
 </resources>

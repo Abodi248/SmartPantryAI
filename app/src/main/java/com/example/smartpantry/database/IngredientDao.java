@@ -1,9 +1,25 @@
 package com.example.smartpantry.database;
 
-// do later: add @Dao annotation and @Query/@Insert/@Update/@Delete methods
+import androidx.lifecycle.LiveData;
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
+import java.util.List;
+
+@Dao
 public interface IngredientDao {
-    // LiveData<List<IngredientEntity>> getAll();
-    // void insert(IngredientEntity entity);
-    // void update(IngredientEntity entity);
-    // void delete(IngredientEntity entity);
+
+    @Query("SELECT * FROM ingredients ORDER BY name ASC")
+    LiveData<List<IngredientEntity>> getAll();
+
+    @Insert
+    long insert(IngredientEntity entity);
+
+    @Update
+    void update(IngredientEntity entity);
+
+    @Delete
+    void delete(IngredientEntity entity);
 }

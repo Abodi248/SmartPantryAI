@@ -1,23 +1,29 @@
 package com.example.smartpantry.database;
 
 import android.content.Context;
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
 
-// do later: add @Database(entities = {IngredientEntity.class}, version = 1)
-// and extend RoomDatabase
-public abstract class AppDatabase {
+@Database(entities = {IngredientEntity.class}, version = 1, exportSchema = false)
+public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase instance;
+
+    public abstract IngredientDao ingredientDao();
 
     public static AppDatabase getInstance(Context context) {
         if (instance == null) {
             synchronized (AppDatabase.class) {
                 if (instance == null) {
-                    // do later: instance = Room.databaseBuilder(context, AppDatabase.class, "smartpantry.db").build();
+                    instance = Room.databaseBuilder(
+                            context.getApplicationContext(),
+                            AppDatabase.class,
+                            "smartpantry.db"
+                    ).build();
                 }
             }
         }
         return instance;
     }
-
-    // do later: public abstract IngredientDao ingredientDao();
 }
