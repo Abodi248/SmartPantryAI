@@ -4,17 +4,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Backend badge: shows "On-device" or "Cloud" -->
+    <com.google.android.material.chip.Chip
+        android:id="@+id/tv_backend_badge"
+        style="@style/Widget.Material3.Chip.Assist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
+        android:clickable="false"
+        android:focusable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Message list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chat_recycler"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/progress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tv_backend_badge" />
 
-    <!-- Empty state (hidden once messages exist) -->
+    <!-- Empty state -->
     <TextView
         android:id="@+id/empty_message"
         style="@style/TextAppearance.Material3.BodyLarge"
@@ -22,9 +37,22 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/empty_chat_message"
+        app:layout_constraintBottom_toTopOf="@id/progress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tv_backend_badge" />
+
+    <!-- Loading indicator shown while AI is thinking -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/input_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Input row -->
     <com.google.android.material.textfield.TextInputLayout

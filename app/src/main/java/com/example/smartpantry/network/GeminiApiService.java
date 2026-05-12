@@ -1,9 +1,17 @@
 package com.example.smartpantry.network;
 
-// do later: add @POST Retrofit interface for Gemini generateContent endpoint
-// POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+import com.example.smartpantry.network.dto.GeminiRequest;
+import com.example.smartpantry.network.dto.GeminiResponse;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.POST;
+import retrofit2.http.Query;
+
 public interface GeminiApiService {
-    // @POST("v1beta/models/gemini-2.0-flash:generateContent")
-    // Call<GeminiResponse> generateContent(@Query("key") String apiKey,
-    //                                       @Body GeminiRequest request);
+
+    @POST("v1beta/models/gemini-2.0-flash:generateContent")
+    Call<GeminiResponse> generateContent(
+            @Query("key") String apiKey,
+            @Body GeminiRequest request
+    );
 }

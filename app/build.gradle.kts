@@ -67,6 +67,8 @@ dependencies {
     implementation(libs.mlkit.text.recognition)
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
+    // On-device LLM inference via MediaPipe (runs Gemma locally on-device GPU)
+    implementation(libs.mediapipe.tasks.genai)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)

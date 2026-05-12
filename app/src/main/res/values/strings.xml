@@ -27,6 +27,11 @@
     <!-- Validation messages -->
     <string name="error_name_required">Name is required</string>
 
+    <!-- Recipes tab -->
+    <string name="btn_generate_recipes">Generate Recipes</string>
+    <string name="label_ingredients">Ingredients</string>
+    <string name="label_steps">Steps</string>
+
     <!-- Content descriptions -->
     <string name="cd_pantry_icon">Pantry</string>
     <string name="cd_recipes_icon">Recipes</string>

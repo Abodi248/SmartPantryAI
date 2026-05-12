@@ -17,6 +17,9 @@ retrofit = "2.11.0"
 okhttp = "4.12.0"
 mlkitTextRecognition = "16.0.0"
 glide = "4.16.0"
+# 0.10.27: adds LlmInference.Backend enum (GPU/CPU) + LlmInferenceSession
+# API ref: https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/genai/llminference/package-summary
+mediapipe = "0.10.27"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -41,6 +44,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
+mediapipe-tasks-genai = { group = "com.google.mediapipe", name = "tasks-genai", version.ref = "mediapipe" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
