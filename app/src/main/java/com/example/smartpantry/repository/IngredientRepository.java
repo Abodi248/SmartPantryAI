@@ -58,6 +58,20 @@ public class IngredientRepository {
         });
     }
 
+    public void insertAll(List<Ingredient> ingredients) {
+        executor.execute(() -> {
+            List<IngredientEntity> entities = new ArrayList<>();
+            for (Ingredient i : ingredients) {
+                IngredientEntity e = new IngredientEntity();
+                e.name = i.getName();
+                e.quantity = i.getQuantity();
+                e.unit = i.getUnit();
+                entities.add(e);
+            }
+            dao.insertAll(entities);
+        });
+    }
+
     public void delete(Ingredient ingredient) {
         executor.execute(() -> {
             IngredientEntity e = new IngredientEntity();

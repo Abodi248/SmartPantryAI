@@ -61,7 +61,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:hint="Ask about cooking…"
+        android:hint="@string/hint_chat_message"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_send"
         app:layout_constraintStart_toStartOf="parent">
@@ -82,7 +82,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginEnd="8dp"
-        android:contentDescription="Send message"
+        android:contentDescription="@string/cd_send_message"
         app:icon="@android:drawable/ic_menu_send"
         app:layout_constraintBottom_toBottomOf="@id/input_layout"
         app:layout_constraintEnd_toEndOf="parent"

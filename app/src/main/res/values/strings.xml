@@ -32,6 +32,18 @@
     <string name="label_ingredients">Ingredients</string>
     <string name="label_steps">Steps</string>
 
+    <!-- Receipt scanning -->
+    <string name="cd_scan_receipt">Scan receipt</string>
+    <string name="scan_results_title">Items Found</string>
+    <string name="scan_items_found">%1$d item(s) found. Select which to add:</string>
+    <string name="scan_add_to_pantry">Add to Pantry</string>
+    <string name="scan_error_no_camera">Camera permission is required to scan receipts</string>
+    <string name="scan_loading">Reading receipt…</string>
+
+    <!-- Chat tab -->
+    <string name="hint_chat_message">Ask about cooking…</string>
+    <string name="cd_send_message">Send message</string>
+
     <!-- Content descriptions -->
     <string name="cd_pantry_icon">Pantry</string>
     <string name="cd_recipes_icon">Recipes</string>

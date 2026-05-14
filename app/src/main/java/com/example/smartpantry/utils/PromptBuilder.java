@@ -31,6 +31,33 @@ public class PromptBuilder {
         return sb.toString();
     }
 
+    /**
+     * Prompt for on-device model (Gemma). Ends with "[" to prime the model into
+     * completing a JSON array directly, preventing prose responses.
+     * Prepend "[" to the model's response before parsing.
+     */
+    public static String buildReceiptParsePromptLocal(String ocrText) {
+        return "Extract every food or beverage item from the grocery receipt below.\n"
+                + "Return a JSON array of objects with keys: name, quantity, unit.\n"
+                + "Use empty string for unknown quantity or unit.\n"
+                + "Receipt:\n"
+                + ocrText + "\n"
+                + "JSON:\n[";
+    }
+
+    /** Prompt for cloud (Gemini) — model follows instructions reliably without priming. */
+    public static String buildReceiptParsePrompt(String ocrText) {
+        return "You are a grocery receipt parser.\n"
+                + "Extract all food and beverage items from the following receipt text.\n"
+                + "For each item determine: name, quantity (number as string), and unit "
+                + "(g, kg, ml, L, pcs, or empty string if unknown).\n"
+                + "Respond with ONLY a JSON array — no explanation, no markdown:\n"
+                + "[{\"name\": \"Milk\", \"quantity\": \"1\", \"unit\": \"L\"}, ...]\n"
+                + "If quantity or unit cannot be determined use \"1\" and \"\" respectively.\n"
+                + "Receipt text:\n"
+                + ocrText;
+    }
+
     private static String formatIngredients(List<Ingredient> ingredients) {
         if (ingredients == null || ingredients.isEmpty()) return "none";
         StringBuilder sb = new StringBuilder();

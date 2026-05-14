@@ -17,6 +17,9 @@ public interface IngredientDao {
     @Insert
     long insert(IngredientEntity entity);
 
+    @Insert
+    void insertAll(List<IngredientEntity> entities);
+
     @Update
     void update(IngredientEntity entity);
 
