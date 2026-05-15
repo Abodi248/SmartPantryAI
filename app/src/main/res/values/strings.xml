@@ -2,6 +2,7 @@
     <string name="app_name">SmartPantry AI</string>
 
     <!-- Bottom nav tab labels -->
+    <string name="tab_home">Home</string>
     <string name="tab_pantry">Pantry</string>
     <string name="tab_recipes">Recipes</string>
     <string name="tab_chat">Chat</string>
@@ -45,10 +46,53 @@
     <string name="cd_send_message">Send message</string>
 
     <!-- Content descriptions -->
+    <string name="cd_home_icon">Home</string>
     <string name="cd_pantry_icon">Pantry</string>
     <string name="cd_recipes_icon">Recipes</string>
     <string name="cd_chat_icon">Chat</string>
     <string name="cd_add_ingredient">Add ingredient</string>
     <string name="cd_edit_ingredient">Edit ingredient</string>
     <string name="cd_delete_ingredient">Delete ingredient</string>
+    <string name="cd_delete_meal">Delete meal</string>
+    <string name="cd_add_recipe">Create recipe</string>
+    <string name="cd_delete_recipe">Delete recipe</string>
+    <string name="cd_expand_recipe">View recipe details</string>
+    <string name="action_delete_recipe">Delete recipe</string>
+    <string name="action_delete">Delete</string>
+    <string name="chip_ai_recipe">AI</string>
+    <string name="title_recipe_detail">Recipe</string>
+    <string name="label_missing">Missing from pantry</string>
+    <string name="dialog_delete_recipe_title">Delete recipe?</string>
+    <string name="dialog_delete_recipe_message">This recipe will be permanently removed.</string>
+    <string name="btn_pick_saved_recipe">Pick from saved recipes</string>
+    <string name="msg_no_saved_recipes">No saved recipes yet. Create one in the Recipes tab.</string>
+    <string name="cd_remove_row">Remove row</string>
+    <string name="cd_navigate_back">Navigate back</string>
+
+    <!-- Home tab -->
+    <string name="home_welcome">Welcome!</string>
+    <string name="home_subtitle">What are we cooking today?</string>
+    <string name="home_pantry_items">Pantry items</string>
+    <string name="home_recipes_ready">Recipes ready</string>
+    <string name="home_meal_prep">Meal Prep This Week</string>
+    <string name="home_no_meals">No meals planned for this day.</string>
+    <string name="home_add_meal">Plan a meal</string>
+    <string name="home_save_meal">Add</string>
+
+    <!-- Meal plan bottom sheet -->
+    <string name="hint_meal_title">Recipe / meal name *</string>
+    <string name="hint_meal_notes">Notes (optional)</string>
+
+    <!-- Add recipe -->
+    <string name="title_add_recipe">New Recipe</string>
+    <string name="hint_recipe_title">Recipe title *</string>
+    <string name="hint_step_description">Step description</string>
+    <string name="action_add_row">Add</string>
+    <string name="action_save_recipe">Save Recipe</string>
+    <string name="chip_my_recipe">My Recipe</string>
+    <string name="error_add_ingredient">Add at least one ingredient</string>
+
+    <!-- Search -->
+    <string name="hint_search_pantry">Search pantry…</string>
+    <string name="hint_search_recipes">Search recipes…</string>
 </resources>

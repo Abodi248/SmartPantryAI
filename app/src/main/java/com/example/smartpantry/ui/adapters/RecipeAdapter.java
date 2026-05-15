@@ -13,69 +13,83 @@ import java.util.List;
 
 public class RecipeAdapter extends ListAdapter<Recipe, RecipeAdapter.ViewHolder> {
 
+    public interface OnRecipeClickListener {
+        void onRecipeClick(Recipe recipe);
+    }
+
     private static final DiffUtil.ItemCallback<Recipe> DIFF_CB =
             new DiffUtil.ItemCallback<Recipe>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull Recipe a, @NonNull Recipe b) {
-                    return a.getTitle().equals(b.getTitle());
+                    if (a.isSaved() && b.isSaved()) return a.getSavedId() == b.getSavedId();
+                    if (!a.isSaved() && !b.isSaved()) return a.getTitle().equals(b.getTitle());
+                    return false;
                 }
 
                 @Override
                 public boolean areContentsTheSame(@NonNull Recipe a, @NonNull Recipe b) {
                     return a.getTitle().equals(b.getTitle())
-                            && a.getIngredients().equals(b.getIngredients());
+                            && a.getIngredients().equals(b.getIngredients())
+                            && a.isSaved() == b.isSaved()
+                            && a.isUserCreated() == b.isUserCreated();
                 }
             };
 
-    public RecipeAdapter() {
+    private final OnRecipeClickListener clickListener;
+
+    public RecipeAdapter(OnRecipeClickListener clickListener) {
         super(DIFF_CB);
+        this.clickListener = clickListener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ItemRecipeBinding binding = ItemRecipeBinding.inflate(
-                LayoutInflater.from(parent.getContext()), parent, false);
-        return new ViewHolder(binding);
+        return new ViewHolder(ItemRecipeBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position));
+        holder.bind(getItem(position), clickListener);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        private final ItemRecipeBinding binding;
+        private final ItemRecipeBinding b;
 
-        ViewHolder(ItemRecipeBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
+        ViewHolder(ItemRecipeBinding b) {
+            super(b.getRoot());
+            this.b = b;
         }
 
-        void bind(Recipe recipe) {
-            binding.tvRecipeTitle.setText(recipe.getTitle());
+        void bind(Recipe recipe, OnRecipeClickListener clickListener) {
+            b.tvRecipeTitle.setText(recipe.getTitle());
 
-            binding.tvRecipeIngredients.setText(formatList(recipe.getIngredients(), false));
-            binding.tvRecipeSteps.setText(formatList(recipe.getSteps(), true));
-
-            List<String> missing = recipe.getMissingIngredients();
-            if (missing != null && !missing.isEmpty()) {
-                binding.tvMissing.setText("Missing from pantry: " + String.join(", ", missing));
-                binding.tvMissing.setVisibility(View.VISIBLE);
+            // Ingredient preview
+            List<String> ings = recipe.getIngredients();
+            if (ings != null && !ings.isEmpty()) {
+                String preview = ings.size() <= 2
+                        ? String.join(", ", ings)
+                        : ings.get(0) + ", " + ings.get(1) + " +" + (ings.size() - 2) + " more";
+                b.tvIngredientPreview.setText(preview);
+                b.tvIngredientPreview.setVisibility(View.VISIBLE);
             } else {
-                binding.tvMissing.setVisibility(View.GONE);
+                b.tvIngredientPreview.setVisibility(View.GONE);
             }
-        }
 
-        private String formatList(List<String> items, boolean numbered) {
-            if (items == null || items.isEmpty()) return "—";
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < items.size(); i++) {
-                if (i > 0) sb.append('\n');
-                sb.append(numbered ? (i + 1) + ". " : "• ");
-                sb.append(items.get(i));
+            // Source chips — mutually exclusive
+            if (recipe.isSaved() && recipe.isUserCreated()) {
+                b.chipMyRecipe.setVisibility(View.VISIBLE);
+                b.chipAiRecipe.setVisibility(View.GONE);
+            } else if (recipe.isSaved() && !recipe.isUserCreated()) {
+                b.chipMyRecipe.setVisibility(View.GONE);
+                b.chipAiRecipe.setVisibility(View.VISIBLE);
+            } else {
+                b.chipMyRecipe.setVisibility(View.GONE);
+                b.chipAiRecipe.setVisibility(View.GONE);
             }
-            return sb.toString();
+
+            b.cardRecipe.setOnClickListener(v -> clickListener.onRecipeClick(recipe));
         }
     }
 }

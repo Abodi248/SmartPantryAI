@@ -1,29 +1,74 @@
 package com.example.smartpantry.repository;
 
 import android.app.Application;
+import android.util.Log;
 import com.example.smartpantry.BuildConfig;
 import com.example.smartpantry.model.Ingredient;
 import com.example.smartpantry.model.Recipe;
 import com.example.smartpantry.network.GeminiClient;
+import com.example.smartpantry.network.LocalAiClient;
 import com.example.smartpantry.network.dto.GeminiRequest;
 import com.example.smartpantry.network.dto.GeminiResponse;
 import com.example.smartpantry.network.dto.RecipeDto;
+import com.example.smartpantry.utils.AiCapabilityChecker;
 import com.example.smartpantry.utils.PromptBuilder;
 import com.google.gson.Gson;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class RecipeRepository {
 
-    public RecipeRepository(Application application) {}
+    private static final String TAG = "RecipeRepository";
+
+    private final LocalAiClient localAiClient;
+
+    public RecipeRepository(Application application) {
+        boolean capable = AiCapabilityChecker.isDeviceCapable(application);
+        boolean modelPresent = AiCapabilityChecker.isModelPresent(LocalAiClient.DEFAULT_MODEL_PATH);
+        if (capable && modelPresent) {
+            localAiClient = new LocalAiClient(
+                    application,
+                    LocalAiClient.DEFAULT_MODEL_PATH,
+                    backend -> Log.i(TAG, "Recipe AI backend: " + backend.getLabel())
+            );
+        } else {
+            localAiClient = null;
+            Log.i(TAG, "Recipe AI backend: CLOUD (device not capable or model absent)");
+        }
+    }
 
     public void generateRecipes(List<Ingredient> ingredients, String restrictions,
                                 Consumer<List<Recipe>> onSuccess, Consumer<String> onError) {
+        if (localAiClient != null && localAiClient.isReady()) {
+            Log.d(TAG, "Generating recipe on-device [" + localAiClient.getBackendType().getLabel() + "]");
+            String prompt = PromptBuilder.buildRecipePromptLocal(ingredients, restrictions);
+            localAiClient.generateAsync(prompt,
+                    response -> {
+                        Log.d(TAG, "On-device raw response: " + response);
+                        List<Recipe> recipes = parseRecipes("{" + response);
+                        if (recipes.isEmpty()) {
+                            Log.w(TAG, "On-device parse failed, falling back to cloud");
+                            generateViaCloud(ingredients, restrictions, onSuccess, onError);
+                        } else {
+                            onSuccess.accept(recipes);
+                        }
+                    },
+                    error -> {
+                        Log.w(TAG, "On-device inference failed, falling back to cloud: " + error);
+                        generateViaCloud(ingredients, restrictions, onSuccess, onError);
+                    });
+        } else {
+            generateViaCloud(ingredients, restrictions, onSuccess, onError);
+        }
+    }
+
+    private void generateViaCloud(List<Ingredient> ingredients, String restrictions,
+                                  Consumer<List<Recipe>> onSuccess, Consumer<String> onError) {
+        Log.d(TAG, "Generating recipe via cloud");
         String prompt = PromptBuilder.buildRecipePrompt(ingredients, restrictions);
         GeminiClient.getInstance()
                 .generateContent(BuildConfig.GEMINI_API_KEY, new GeminiRequest(prompt))
@@ -53,10 +98,7 @@ public class RecipeRepository {
 
     private List<Recipe> parseRecipes(String text) {
         if (text == null || text.isEmpty()) return Collections.emptyList();
-
         String json = text.trim();
-
-        // Strip markdown code fences (```json ... ``` or ``` ... ```)
         if (json.contains("```")) {
             int fenceEnd = json.indexOf('\n', json.indexOf("```"));
             int closeFence = json.lastIndexOf("```");
@@ -64,17 +106,14 @@ public class RecipeRepository {
                 json = json.substring(fenceEnd + 1, closeFence).trim();
             }
         }
-
-        // Find the start of JSON content
         int objStart = json.indexOf('{');
         int arrStart = json.indexOf('[');
         if (objStart == -1 && arrStart == -1) return Collections.emptyList();
-
         Gson gson = new Gson();
         try {
             if (arrStart != -1 && (objStart == -1 || arrStart < objStart)) {
                 RecipeDto[] dtos = gson.fromJson(json.substring(arrStart), RecipeDto[].class);
-                List<Recipe> result = new ArrayList<>();
+                java.util.List<Recipe> result = new java.util.ArrayList<>();
                 for (RecipeDto dto : dtos) result.add(dtoToRecipe(dto));
                 return result;
             } else {
@@ -93,5 +132,9 @@ public class RecipeRepository {
                 dto.steps != null ? dto.steps : Collections.emptyList(),
                 dto.missing != null ? dto.missing : Collections.emptyList()
         );
+    }
+
+    public void shutdown() {
+        if (localAiClient != null) localAiClient.close();
     }
 }

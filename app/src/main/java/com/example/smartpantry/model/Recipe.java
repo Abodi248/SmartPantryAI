@@ -1,9 +1,13 @@
 package com.example.smartpantry.model;
 
+import java.util.Collections;
 import java.util.List;
 
 public class Recipe {
 
+    private long savedId;           // database row id; 0 for transient (never used now)
+    private boolean saved;          // true if persisted in Room
+    private boolean userCreated;    // true = manual entry, false = AI-generated
     private String title;
     private List<String> ingredients;
     private List<String> steps;
@@ -12,11 +16,17 @@ public class Recipe {
     public Recipe(String title, List<String> ingredients, List<String> steps,
                   List<String> missingIngredients) {
         this.title = title;
-        this.ingredients = ingredients;
-        this.steps = steps;
-        this.missingIngredients = missingIngredients;
+        this.ingredients = ingredients != null ? ingredients : Collections.emptyList();
+        this.steps = steps != null ? steps : Collections.emptyList();
+        this.missingIngredients = missingIngredients != null ? missingIngredients : Collections.emptyList();
     }
 
+    public long getSavedId() { return savedId; }
+    public void setSavedId(long savedId) { this.savedId = savedId; }
+    public boolean isSaved() { return saved; }
+    public void setSaved(boolean saved) { this.saved = saved; }
+    public boolean isUserCreated() { return userCreated; }
+    public void setUserCreated(boolean userCreated) { this.userCreated = userCreated; }
     public String getTitle() { return title; }
     public List<String> getIngredients() { return ingredients; }
     public List<String> getSteps() { return steps; }

@@ -2,7 +2,12 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/nav_pantry">
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.smartpantry.ui.fragments.HomeFragment"
+        android:label="@string/tab_home" />
 
     <fragment
         android:id="@+id/nav_pantry"
@@ -12,7 +17,35 @@
     <fragment
         android:id="@+id/nav_recipes"
         android:name="com.example.smartpantry.ui.fragments.RecipesFragment"
-        android:label="@string/tab_recipes" />
+        android:label="@string/tab_recipes">
+
+        <action
+            android:id="@+id/action_nav_recipes_to_nav_add_recipe"
+            app:destination="@id/nav_add_recipe"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+
+        <action
+            android:id="@+id/action_nav_recipes_to_nav_recipe_detail"
+            app:destination="@id/nav_recipe_detail"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_add_recipe"
+        android:name="com.example.smartpantry.ui.fragments.AddRecipeFragment"
+        android:label="@string/title_add_recipe" />
+
+    <fragment
+        android:id="@+id/nav_recipe_detail"
+        android:name="com.example.smartpantry.ui.fragments.RecipeDetailFragment"
+        android:label="@string/title_recipe_detail" />
 
     <fragment
         android:id="@+id/nav_chat"

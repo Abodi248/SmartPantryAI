@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,6 +114,15 @@ public class PantryFragment extends Fragment {
                         .show(getChildFragmentManager(), AddIngredientDialog.TAG));
 
         binding.fabScanReceipt.setOnClickListener(v -> checkPermissionAndScan());
+
+        // Search
+        binding.etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                viewModel.setSearchQuery(s != null ? s.toString() : "");
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
     }
 
     @Override

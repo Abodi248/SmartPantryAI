@@ -4,6 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Search bar -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/search_layout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:hint="@string/hint_search_recipes"
+        app:endIconMode="clear_text"
+        app:startIconDrawable="@drawable/ic_search"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:singleLine="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recipes_recycler"
         android:layout_width="0dp"
@@ -14,7 +38,7 @@
         app:layout_constraintBottom_toTopOf="@id/btn_generate_recipes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/search_layout" />
 
     <!-- Loading indicator -->
     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -26,7 +50,7 @@
         app:layout_constraintBottom_toTopOf="@id/btn_generate_recipes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/search_layout" />
 
     <!-- Empty state -->
     <ImageView
@@ -39,7 +63,7 @@
         app:layout_constraintBottom_toTopOf="@id/empty_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_layout"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
@@ -55,6 +79,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/empty_icon" />
 
+    <!-- Generate button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_generate_recipes"
         android:layout_width="0dp"
@@ -62,7 +87,19 @@
         android:layout_margin="16dp"
         android:text="@string/btn_generate_recipes"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/fab_add_recipe"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- FAB: Create recipe -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_recipe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/cd_add_recipe"
+        android:tooltipText="@string/cd_add_recipe"
+        app:srcCompat="@drawable/ic_add_circle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

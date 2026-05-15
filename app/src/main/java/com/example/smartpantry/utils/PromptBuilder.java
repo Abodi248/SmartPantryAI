@@ -5,6 +5,7 @@ import java.util.List;
 
 public class PromptBuilder {
 
+    /** Cloud prompt — Gemini follows the JSON-only instruction reliably. */
     public static String buildRecipePrompt(List<Ingredient> ingredients, String dietaryRestrictions) {
         StringBuilder sb = new StringBuilder();
         sb.append("You are a helpful cooking assistant.\n");
@@ -15,8 +16,26 @@ public class PromptBuilder {
                   ? "none" : dietaryRestrictions)
           .append(".\n");
         sb.append("Suggest a recipe using primarily these ingredients.\n");
-        sb.append("Respond in this JSON format:\n");
+        sb.append("Respond with ONLY a JSON object — no explanation, no markdown:\n");
         sb.append("{\"title\": \"...\", \"ingredients\": [...], \"steps\": [...], \"missing\": [...]}");
+        return sb.toString();
+    }
+
+    /**
+     * On-device prompt for Gemma. Ends with "{" to prime the model into completing
+     * a JSON object directly. Prepend "{" to the response before parsing.
+     */
+    public static String buildRecipePromptLocal(List<Ingredient> ingredients,
+                                                String dietaryRestrictions) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("You are a cooking assistant. Suggest one recipe.\n");
+        sb.append("Ingredients available: ").append(formatIngredients(ingredients)).append(".\n");
+        if (dietaryRestrictions != null && !dietaryRestrictions.isEmpty()) {
+            sb.append("Dietary restrictions: ").append(dietaryRestrictions).append(".\n");
+        }
+        sb.append("Output a JSON object with keys: title (string), ingredients (array of strings),\n");
+        sb.append("steps (array of strings), missing (array of strings for any needed ingredients).\n");
+        sb.append("JSON:\n{");
         return sb.toString();
     }
 
