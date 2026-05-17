@@ -76,8 +76,6 @@ public class RecipeAdapter extends ListAdapter<Recipe, RecipeAdapter.ViewHolder>
             } else {
                 b.tvIngredientPreview.setVisibility(View.GONE);
             }
-
-            // Source chips — mutually exclusive
             if (recipe.isSaved() && recipe.isUserCreated()) {
                 b.chipMyRecipe.setVisibility(View.VISIBLE);
                 b.chipAiRecipe.setVisibility(View.GONE);

@@ -46,6 +46,8 @@ public class PantryViewModel extends AndroidViewModel {
         filteredIngredients.setValue(result);
     }
 
+    public boolean isAiAvailable() { return receiptScanRepository.isAiAvailable(); }
+
     public LiveData<List<Ingredient>> getIngredients() { return filteredIngredients; }
 
     public void setSearchQuery(String query) { searchQuery.setValue(query); }

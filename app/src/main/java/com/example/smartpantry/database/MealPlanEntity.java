@@ -10,7 +10,7 @@ public class MealPlanEntity {
     public long id;
 
     @NonNull
-    public String date = "";        // ISO "yyyy-MM-dd"
+    public String date = "";
 
     @NonNull
     public String recipeTitle = "";

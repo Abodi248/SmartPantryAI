@@ -5,9 +5,9 @@ import java.util.List;
 
 public class Recipe {
 
-    private long savedId;           // database row id; 0 for transient (never used now)
-    private boolean saved;          // true if persisted in Room
-    private boolean userCreated;    // true = manual entry, false = AI-generated
+    private long savedId;
+    private boolean saved;
+    private boolean userCreated;
     private String title;
     private List<String> ingredients;
     private List<String> steps;

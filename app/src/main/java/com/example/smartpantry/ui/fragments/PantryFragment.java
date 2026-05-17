@@ -113,7 +113,12 @@ public class PantryFragment extends Fragment {
                 AddIngredientDialog.newAddInstance()
                         .show(getChildFragmentManager(), AddIngredientDialog.TAG));
 
-        binding.fabScanReceipt.setOnClickListener(v -> checkPermissionAndScan());
+        if (!viewModel.isAiAvailable()) {
+            binding.fabScanReceipt.setEnabled(false);
+            binding.tvScanUnavailable.setVisibility(View.VISIBLE);
+        } else {
+            binding.fabScanReceipt.setOnClickListener(v -> checkPermissionAndScan());
+        }
 
         // Search
         binding.etSearch.addTextChangedListener(new TextWatcher() {

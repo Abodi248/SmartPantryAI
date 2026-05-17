@@ -34,17 +34,14 @@ public class AddRecipeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Use activity scope so saved recipes stream to RecipesFragment immediately
         viewModel = new ViewModelProvider(requireActivity())
                 .get(RecipesViewModel.class);
 
-        // Toolbar navigation
         binding.toolbar.setNavigationIcon(R.drawable.ic_nav_back);
         binding.toolbar.setNavigationContentDescription(R.string.cd_navigate_back);
         binding.toolbar.setNavigationOnClickListener(v ->
                 Navigation.findNavController(v).navigateUp());
 
-        // Start with one empty row in each container
         addIngredientRow();
         addStepRow();
 

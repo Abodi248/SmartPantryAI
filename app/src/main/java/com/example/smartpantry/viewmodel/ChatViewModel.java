@@ -39,11 +39,10 @@ public class ChatViewModel extends AndroidViewModel {
     public LiveData<Boolean> getIsLoading() { return isLoading; }
     public LiveData<String> getError() { return error; }
 
-    /**
-     * Emits "On-device (GPU)", "On-device (CPU)", or "Cloud".
-     * Updates asynchronously once the local model init resolves.
-     */
+    /** Emits "On-device (GPU)", "On-device (CPU)", or "Unavailable". */
     public LiveData<String> getBackendLabel() { return chatRepository.getBackendLabel(); }
+
+    public boolean isAiAvailable() { return chatRepository.isAiAvailable(); }
 
     public void sendMessage(String userText) {
         if (userText == null || userText.trim().isEmpty()) return;

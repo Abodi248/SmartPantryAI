@@ -24,7 +24,7 @@ public class LocalAiClient {
     public enum BackendType {
         GPU("On-device (GPU)"),
         CPU("On-device (CPU)"),
-        NONE("Cloud");
+        NONE("Unavailable");
 
         private final String label;
 
@@ -33,11 +33,9 @@ public class LocalAiClient {
         public String getLabel() { return label; }
     }
 
-    // LlmInference is NOT thread-safe; all calls serialised through this executor
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private LlmInference llmInference;
-    // Session options are immutable and reused across inference calls
     private LlmInferenceSessionOptions sessionOptions;
 
     private volatile BackendType backendType = BackendType.NONE;
@@ -46,7 +44,6 @@ public class LocalAiClient {
     public LocalAiClient(Context context, String modelPath, Consumer<BackendType> onReady) {
         Context appContext = context.getApplicationContext();
         executor.execute(() -> {
-            // Session options (topK, temperature) are independent of backend
             sessionOptions = LlmInferenceSessionOptions.builder()
                     .setTopK(TOP_K)
                     .setTemperature(TEMPERATURE)
@@ -117,7 +114,6 @@ public class LocalAiClient {
             }
         });
     }
-
     public void close() {
         ready = false;
         executor.execute(this::releaseEngine);

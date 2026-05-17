@@ -4,11 +4,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.example.smartpantry.R;
 import com.example.smartpantry.databinding.FragmentHomeBinding;
 import com.example.smartpantry.ui.adapters.MealPlanListAdapter;
 import com.example.smartpantry.ui.adapters.WeekDayAdapter;
@@ -16,9 +19,7 @@ import com.example.smartpantry.ui.dialogs.DayMealPlanBottomSheet;
 import com.example.smartpantry.viewmodel.HomeViewModel;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
 import java.util.Calendar;
-import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
@@ -41,6 +42,26 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
+        // Toolbar — person icon navigates to Settings
+        binding.toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_settings) {
+                NavHostFragment.findNavController(this)
+                               .navigate(R.id.action_nav_home_to_nav_settings);
+                return true;
+            }
+            return false;
+        });
+
+        // Back press on Home finishes the activity
+        requireActivity().getOnBackPressedDispatcher().addCallback(
+                getViewLifecycleOwner(),
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        requireActivity().finish();
+                    }
+                });
 
         // Welcome greeting
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
@@ -92,7 +113,6 @@ public class HomeFragment extends Fragment {
             sheet.show(getChildFragmentManager(), DayMealPlanBottomSheet.TAG);
         });
 
-        // Set today's label initially
         updateDayLabel(LocalDate.now().format(ISO));
     }
 

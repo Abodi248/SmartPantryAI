@@ -33,11 +33,8 @@ public class ReceiptParser {
         }
     }
 
-    // Extracts the first [...] block from anywhere in the model response,
-    // handling markdown fences and prose that surrounds the JSON array.
     private static String extractJsonArray(String text) {
         String s = text.trim();
-        // Strip markdown code fences first
         if (s.contains("```")) {
             s = s.replaceAll("(?s)```(?:json)?\\s*", "").trim();
         }

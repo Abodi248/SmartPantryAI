@@ -36,6 +36,8 @@ public class RecipesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(RecipesViewModel.class);
 
+        final boolean aiAvailable = viewModel.isAiAvailable();
+
         adapter = new RecipeAdapter(recipe -> {
             viewModel.selectRecipe(recipe);
             Navigation.findNavController(binding.getRoot())
@@ -50,24 +52,36 @@ public class RecipesFragment extends Fragment {
             binding.recipesRecycler.setVisibility(hasResults ? View.VISIBLE : View.GONE);
             binding.emptyIcon.setVisibility(hasResults ? View.GONE : View.VISIBLE);
             binding.emptyMessage.setVisibility(hasResults ? View.GONE : View.VISIBLE);
+            if (!hasResults) {
+                binding.emptyMessage.setText(aiAvailable
+                        ? R.string.empty_recipes_message
+                        : R.string.ai_unavailable_recipes);
+            }
         });
 
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), loading -> {
             binding.progress.setVisibility(loading ? View.VISIBLE : View.GONE);
-            binding.btnGenerateRecipes.setEnabled(!loading);
+            // Never re-enable the button when AI is unavailable
+            binding.btnGenerateRecipes.setEnabled(!loading && aiAvailable);
         });
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null && !error.isEmpty()) {
+            if (error != null && !error.isEmpty()
+                    && !error.equals("on_device_initializing")
+                    && !error.equals("on_device_unavailable")) {
                 Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_LONG)
                         .setAction("Retry", v -> viewModel.generateRecipes())
                         .show();
             }
         });
 
+        // Disable generate button immediately if AI is not available
+        if (!aiAvailable) {
+            binding.btnGenerateRecipes.setEnabled(false);
+        }
+
         binding.btnGenerateRecipes.setOnClickListener(v -> viewModel.generateRecipes());
 
-        // Search
         binding.etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -76,7 +90,6 @@ public class RecipesFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // FAB: navigate to AddRecipeFragment
         binding.fabAddRecipe.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_nav_recipes_to_nav_add_recipe));
     }

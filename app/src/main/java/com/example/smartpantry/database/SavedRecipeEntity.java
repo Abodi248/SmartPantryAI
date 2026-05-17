@@ -13,10 +13,10 @@ public class SavedRecipeEntity {
     public String title = "";
 
     @NonNull
-    public String ingredientsJson = "[]";   // Gson-serialised List<String>
+    public String ingredientsJson = "[]";
 
     @NonNull
-    public String stepsJson = "[]";         // Gson-serialised List<String>
+    public String stepsJson = "[]";
 
     public int isUserCreated = 1;
 }

@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.example.smartpantry.R;
 import com.example.smartpantry.databinding.FragmentChatBinding;
 import com.example.smartpantry.ui.adapters.ChatAdapter;
 import com.example.smartpantry.viewmodel.ChatViewModel;
@@ -39,6 +40,20 @@ public class ChatFragment extends Fragment {
         binding.chatRecycler.setLayoutManager(layoutManager);
         binding.chatRecycler.setAdapter(adapter);
 
+        viewModel.getBackendLabel().observe(getViewLifecycleOwner(),
+                label -> binding.tvBackendBadge.setText(label));
+
+        if (!viewModel.isAiAvailable()) {
+            // Persistent unavailability state — lock the whole chat UI
+            binding.emptyMessage.setText(R.string.ai_unavailable_chat);
+            binding.emptyMessage.setVisibility(View.VISIBLE);
+            binding.chatRecycler.setVisibility(View.GONE);
+            binding.inputLayout.setEnabled(false);
+            binding.etMessage.setEnabled(false);
+            binding.btnSend.setEnabled(false);
+            return;
+        }
+
         viewModel.getMessages().observe(getViewLifecycleOwner(), messages -> {
             boolean empty = messages == null || messages.isEmpty();
             binding.emptyMessage.setVisibility(empty ? View.VISIBLE : View.GONE);
@@ -55,13 +70,12 @@ public class ChatFragment extends Fragment {
         });
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null && !error.isEmpty()) {
+            if (error != null && !error.isEmpty()
+                    && !error.equals("on_device_initializing")
+                    && !error.equals("on_device_unavailable")) {
                 Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_LONG).show();
             }
         });
-
-        viewModel.getBackendLabel().observe(getViewLifecycleOwner(),
-                label -> binding.tvBackendBadge.setText(label));
 
         binding.btnSend.setOnClickListener(v -> dispatchMessage());
 

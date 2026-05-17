@@ -9,8 +9,8 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(
-    entities = {IngredientEntity.class, MealPlanEntity.class, SavedRecipeEntity.class},
-    version = 3,
+    entities = {IngredientEntity.class, MealPlanEntity.class, SavedRecipeEntity.class, UserEntity.class},
+    version = 4,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -20,6 +20,23 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract IngredientDao ingredientDao();
     public abstract MealPlanDao mealPlanDao();
     public abstract SavedRecipeDao savedRecipeDao();
+    public abstract UserDao userDao();
+
+    static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL(
+                "CREATE TABLE IF NOT EXISTS users ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+                + "displayName TEXT NOT NULL,"
+                + "username TEXT NOT NULL,"
+                + "passwordHash TEXT NOT NULL)"
+            );
+            database.execSQL(
+                "CREATE UNIQUE INDEX IF NOT EXISTS index_users_username ON users (username)"
+            );
+        }
+    };
 
     static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
@@ -58,7 +75,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             AppDatabase.class,
                             "smartpantry.db"
-                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build();
+                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build();
                 }
             }
         }

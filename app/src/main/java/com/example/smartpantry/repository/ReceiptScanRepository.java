@@ -3,12 +3,8 @@ package com.example.smartpantry.repository;
 import android.app.Application;
 import android.net.Uri;
 import android.util.Log;
-import com.example.smartpantry.BuildConfig;
 import com.example.smartpantry.model.Ingredient;
-import com.example.smartpantry.network.GeminiClient;
 import com.example.smartpantry.network.LocalAiClient;
-import com.example.smartpantry.network.dto.GeminiRequest;
-import com.example.smartpantry.network.dto.GeminiResponse;
 import com.example.smartpantry.utils.AiCapabilityChecker;
 import com.example.smartpantry.utils.PromptBuilder;
 import com.example.smartpantry.utils.ReceiptParser;
@@ -19,9 +15,6 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ReceiptScanRepository {
 
@@ -29,6 +22,7 @@ public class ReceiptScanRepository {
 
     private final Application application;
     private final LocalAiClient localAiClient;
+    private final boolean aiAvailable;
 
     public ReceiptScanRepository(Application application) {
         this.application = application;
@@ -40,15 +34,24 @@ public class ReceiptScanRepository {
                     application,
                     LocalAiClient.DEFAULT_MODEL_PATH,
                     backend -> Log.i(TAG, "Receipt AI backend: " + backend.getLabel()));
+            aiAvailable = true;
         } else {
             localAiClient = null;
-            Log.i(TAG, "Receipt AI: cloud (device not capable or model absent)");
+            aiAvailable = false;
+            Log.w(TAG, "On-device AI unavailable — RAM insufficient or model file absent");
         }
     }
+
+    public boolean isAiAvailable() { return aiAvailable; }
 
     public void parseReceiptAsync(Uri imageUri,
                                    Consumer<List<Ingredient>> onSuccess,
                                    Consumer<String> onError) {
+        if (!aiAvailable || localAiClient == null) {
+            onError.accept("on_device_unavailable");
+            return;
+        }
+
         InputImage image;
         try {
             image = InputImage.fromFilePath(application, imageUri);
@@ -78,60 +81,27 @@ public class ReceiptScanRepository {
     private void parseWithAi(String ocrText,
                               Consumer<List<Ingredient>> onSuccess,
                               Consumer<String> onError) {
-        if (localAiClient != null && localAiClient.isReady()) {
-            Log.d(TAG, "Parsing receipt on-device [" + localAiClient.getBackendType().getLabel() + "]");
-            // Prompt ends with "[" — the model completes the array. Prepend "[" when parsing.
-            String prompt = PromptBuilder.buildReceiptParsePromptLocal(ocrText);
-            localAiClient.generateAsync(prompt,
-                    response -> {
-                        Log.d(TAG, "On-device raw response: " + response);
-                        handleParsedResponse("[" + response, onSuccess, onError);
-                    },
-                    error -> {
-                        Log.e(TAG, "On-device inference error: " + error);
-                        onError.accept("On-device inference failed: " + error);
-                    });
-        } else {
-            Log.d(TAG, "Parsing receipt via cloud");
-            parseWithCloud(PromptBuilder.buildReceiptParsePrompt(ocrText), onSuccess, onError);
+        if (!localAiClient.isReady()) {
+            onError.accept("on_device_initializing");
+            return;
         }
-    }
 
-    private void handleParsedResponse(String json,
-                                       Consumer<List<Ingredient>> onSuccess,
-                                       Consumer<String> onError) {
-        List<Ingredient> parsed = ReceiptParser.parse(json);
-        if (parsed.isEmpty()) {
-            onError.accept("No ingredients identified");
-        } else {
-            onSuccess.accept(parsed);
-        }
-    }
-
-    private void parseWithCloud(String prompt,
-                                 Consumer<List<Ingredient>> onSuccess,
-                                 Consumer<String> onError) {
-        GeminiClient.getInstance()
-                .generateContent(BuildConfig.GEMINI_API_KEY, new GeminiRequest(prompt))
-                .enqueue(new Callback<GeminiResponse>() {
-                    @Override
-                    public void onResponse(Call<GeminiResponse> call,
-                                           Response<GeminiResponse> response) {
-                        if (!response.isSuccessful() || response.body() == null) {
-                            Log.e(TAG, "Gemini error: HTTP " + response.code());
-                            onError.accept("Could not parse receipt (error " + response.code() + ")");
-                            return;
-                        }
-                        String json = response.body().getText();
-                        Log.d(TAG, "Cloud receipt parse response: " + json);
-                        handleParsedResponse(json, onSuccess, onError);
+        Log.d(TAG, "Parsing receipt on-device [" + localAiClient.getBackendType().getLabel() + "]");
+        String prompt = PromptBuilder.buildReceiptParsePrompt(ocrText);
+        localAiClient.generateAsync(
+                prompt,
+                response -> {
+                    Log.d(TAG, "On-device raw response: " + response);
+                    List<Ingredient> parsed = ReceiptParser.parse("[" + response);
+                    if (parsed.isEmpty()) {
+                        onError.accept("No ingredients identified from receipt");
+                    } else {
+                        onSuccess.accept(parsed);
                     }
-
-                    @Override
-                    public void onFailure(Call<GeminiResponse> call, Throwable t) {
-                        Log.e(TAG, "Gemini call failed: " + t.getMessage());
-                        onError.accept("Network error: " + t.getMessage());
-                    }
+                },
+                error -> {
+                    Log.e(TAG, "On-device inference error: " + error);
+                    onError.accept("Receipt parsing failed: " + error);
                 });
     }
 

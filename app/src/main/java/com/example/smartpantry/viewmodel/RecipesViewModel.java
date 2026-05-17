@@ -69,6 +69,8 @@ public class RecipesViewModel extends AndroidViewModel {
         displayRecipes.setValue(filtered);
     }
 
+    public boolean isAiAvailable() { return recipeRepository.isAiAvailable(); }
+
     public LiveData<List<Recipe>> getRecipes() { return displayRecipes; }
     public LiveData<Boolean> getIsLoading() { return isLoading; }
     public LiveData<String> getError() { return error; }

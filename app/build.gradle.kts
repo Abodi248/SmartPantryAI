@@ -1,12 +1,5 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
-}
-
-val localProps = Properties().also { props ->
-    val f = rootProject.file("local.properties")
-    if (f.exists()) props.load(f.inputStream())
 }
 
 android {
@@ -20,10 +13,6 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField(
-            "String", "GEMINI_API_KEY",
-            "\"${localProps.getProperty("GEMINI_API_KEY", "")}\""
-        )
     }
 
     buildTypes {
@@ -43,7 +32,6 @@ android {
 
     buildFeatures {
         viewBinding = true
-        buildConfig = true
     }
 }
 
@@ -61,13 +49,12 @@ dependencies {
     implementation(libs.lifecycle.runtime)
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
-    implementation(libs.okhttp.logging)
+    // Gson — used by SavedRecipeRepository for JSON serialisation of List<String>
+    implementation(libs.gson)
     implementation(libs.mlkit.text.recognition)
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
-    // On-device LLM inference via MediaPipe (runs Gemma locally on-device GPU)
+    // On-device LLM inference via MediaPipe (runs Gemma locally on-device)
     implementation(libs.mediapipe.tasks.genai)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
