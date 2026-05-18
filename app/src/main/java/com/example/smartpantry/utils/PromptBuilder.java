@@ -30,7 +30,7 @@ public class PromptBuilder {
         sb.append("Current pantry: ").append(formatIngredients(pantry)).append(".\n\n");
         sb.append("When the user asks for a recipe (keywords: recipe, make, cook, how do I, give me),\n");
         sb.append("respond using EXACTLY this structure — no deviations:\n");
-        sb.append("RECIPE: [just the dish name]\n");
+        sb.append("RECIPE: [The full dish name]\n");
         sb.append("INGREDIENTS:\n- [ingredient 1]\n- [ingredient 2]\n");
         sb.append("STEPS:\n1. [step 1]\n2. [step 2]\n");
         sb.append("TIPS:\n[tip text]\n\n");
