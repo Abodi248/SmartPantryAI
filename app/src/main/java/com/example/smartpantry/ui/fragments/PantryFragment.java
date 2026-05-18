@@ -118,6 +118,12 @@ public class PantryFragment extends Fragment {
             binding.tvScanUnavailable.setVisibility(View.VISIBLE);
         } else {
             binding.fabScanReceipt.setOnClickListener(v -> checkPermissionAndScan());
+            viewModel.getIsAiInitializing().observe(getViewLifecycleOwner(), initializing -> {
+                boolean busy = Boolean.TRUE.equals(initializing);
+                if (!Boolean.TRUE.equals(viewModel.getIsScanLoading().getValue())) {
+                    binding.fabScanReceipt.setEnabled(!busy);
+                }
+            });
         }
 
         // Search

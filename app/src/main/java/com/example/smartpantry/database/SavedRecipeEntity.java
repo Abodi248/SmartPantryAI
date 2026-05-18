@@ -19,4 +19,7 @@ public class SavedRecipeEntity {
     public String stepsJson = "[]";
 
     public int isUserCreated = 1;
+
+    @NonNull
+    public String tips = "";
 }

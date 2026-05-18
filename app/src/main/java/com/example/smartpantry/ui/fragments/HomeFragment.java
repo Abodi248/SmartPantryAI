@@ -17,6 +17,7 @@ import com.example.smartpantry.ui.adapters.MealPlanListAdapter;
 import com.example.smartpantry.ui.adapters.WeekDayAdapter;
 import com.example.smartpantry.ui.dialogs.DayMealPlanBottomSheet;
 import com.example.smartpantry.viewmodel.HomeViewModel;
+import com.example.smartpantry.viewmodel.UserViewModel;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
@@ -28,6 +29,7 @@ public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private HomeViewModel viewModel;
+    private UserViewModel userViewModel;
     private WeekDayAdapter weekDayAdapter;
     private MealPlanListAdapter mealAdapter;
 
@@ -42,6 +44,7 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
 
         // Toolbar — person icon navigates to Settings
         binding.toolbar.setOnMenuItemClickListener(item -> {
@@ -63,10 +66,18 @@ public class HomeFragment extends Fragment {
                     }
                 });
 
-        // Welcome greeting
+        // Welcome greeting with display name
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-        String greeting = hour < 12 ? "Good morning!" : hour < 17 ? "Good afternoon!" : "Good evening!";
-        binding.tvWelcome.setText(greeting);
+        String timeGreeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+        if (userViewModel.getLoggedInUser() != null) {
+            userViewModel.getLoggedInUser().observe(getViewLifecycleOwner(), user -> {
+                String name = (user != null && user.displayName != null && !user.displayName.isEmpty())
+                        ? user.displayName : "";
+                binding.tvWelcome.setText(name.isEmpty() ? timeGreeting + "!" : timeGreeting + ", " + name + "!");
+            });
+        } else {
+            binding.tvWelcome.setText(timeGreeting + "!");
+        }
 
         // Summary cards
         viewModel.getPantryCount().observe(getViewLifecycleOwner(), count ->

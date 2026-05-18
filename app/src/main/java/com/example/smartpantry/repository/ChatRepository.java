@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import com.example.smartpantry.model.ChatMessage;
 import com.example.smartpantry.model.Ingredient;
 import com.example.smartpantry.network.LocalAiClient;
 import com.example.smartpantry.network.LocalAiClient.BackendType;
@@ -20,6 +21,7 @@ public class ChatRepository {
     private final LocalAiClient localAiClient;
     private final boolean aiAvailable;
     private final MutableLiveData<String> backendLabel;
+    private final MutableLiveData<Boolean> isInitializing = new MutableLiveData<>(false);
 
     public ChatRepository(Application application) {
         boolean capable = AiCapabilityChecker.isDeviceCapable(application);
@@ -27,14 +29,13 @@ public class ChatRepository {
 
         if (capable && modelPresent) {
             backendLabel = new MutableLiveData<>("Initializing…");
-            localAiClient = new LocalAiClient(
-                    application,
-                    LocalAiClient.DEFAULT_MODEL_PATH,
-                    backend -> {
-                        Log.i(TAG, "AI backend resolved: " + backend.getLabel());
-                        backendLabel.postValue(backend.getLabel());
-                    }
-            );
+            isInitializing.setValue(true);
+            localAiClient = LocalAiClient.getInstance(application);
+            localAiClient.addOnReadyListener(backend -> {
+                Log.i(TAG, "AI backend resolved: " + backend.getLabel());
+                backendLabel.postValue(backend.getLabel());
+                isInitializing.postValue(false);
+            });
             aiAvailable = true;
         } else {
             localAiClient = null;
@@ -48,7 +49,10 @@ public class ChatRepository {
 
     public LiveData<String> getBackendLabel() { return backendLabel; }
 
+    public LiveData<Boolean> getIsInitializing() { return isInitializing; }
+
     public void sendMessage(String userMessage, List<Ingredient> pantry,
+                            List<ChatMessage> history,
                             Consumer<String> onResult, Consumer<String> onError) {
         if (!aiAvailable || localAiClient == null) {
             onError.accept("on_device_unavailable");
@@ -60,10 +64,19 @@ public class ChatRepository {
             return;
         }
 
-        String prompt = PromptBuilder.buildChatPrompt(pantry, userMessage);
+        String prompt = PromptBuilder.buildChatPrompt(pantry, history, userMessage);
+        boolean recipeRequest = PromptBuilder.isRecipeIntent(userMessage);
 
         if (localAiClient.isReady()) {
-            localAiClient.generateAsync(prompt, onResult, error -> {
+            localAiClient.generateAsync(prompt, response -> {
+                String text = response.trim();
+                if (recipeRequest && !text.startsWith("RECIPE:")) {
+                    text = "RECIPE: " + text;
+                }
+                Log.d(TAG, "Chat response (" + text.length() + " chars): "
+                        + text.substring(0, Math.min(120, text.length())));
+                onResult.accept(text);
+            }, error -> {
                 Log.e(TAG, "Local inference error: " + error);
                 onError.accept(error);
             });
@@ -72,7 +85,4 @@ public class ChatRepository {
         }
     }
 
-    public void shutdown() {
-        if (localAiClient != null) localAiClient.close();
-    }
 }

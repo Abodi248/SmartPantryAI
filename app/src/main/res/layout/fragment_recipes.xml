@@ -33,21 +33,9 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="8dp"
+        android:paddingBottom="88dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/btn_generate_recipes"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_layout" />
-
-    <!-- Loading indicator -->
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/btn_generate_recipes"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search_layout" />
@@ -74,21 +62,10 @@
         android:layout_marginTop="16dp"
         android:gravity="center"
         android:text="@string/empty_recipes_message"
-        app:layout_constraintBottom_toTopOf="@id/btn_generate_recipes"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/empty_icon" />
-
-    <!-- Generate button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_generate_recipes"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/btn_generate_recipes"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/fab_add_recipe"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- FAB: Create recipe -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton

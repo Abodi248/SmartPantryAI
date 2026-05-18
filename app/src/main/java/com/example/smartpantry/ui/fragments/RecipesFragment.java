@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.smartpantry.R;
 import com.example.smartpantry.databinding.FragmentRecipesBinding;
 import com.example.smartpantry.ui.adapters.RecipeAdapter;
+import com.example.smartpantry.ui.fragments.AddRecipeFragment;
 import com.example.smartpantry.viewmodel.RecipesViewModel;
-import com.google.android.material.snackbar.Snackbar;
 
 public class RecipesFragment extends Fragment {
 
@@ -36,13 +36,19 @@ public class RecipesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(RecipesViewModel.class);
 
-        final boolean aiAvailable = viewModel.isAiAvailable();
-
-        adapter = new RecipeAdapter(recipe -> {
-            viewModel.selectRecipe(recipe);
-            Navigation.findNavController(binding.getRoot())
-                    .navigate(R.id.action_nav_recipes_to_nav_recipe_detail);
-        });
+        adapter = new RecipeAdapter(
+                recipe -> {
+                    viewModel.selectRecipe(recipe);
+                    Navigation.findNavController(binding.getRoot())
+                            .navigate(R.id.action_nav_recipes_to_nav_recipe_detail);
+                },
+                recipe -> {
+                    Bundle args = new Bundle();
+                    args.putLong(AddRecipeFragment.ARG_RECIPE_ID, recipe.getSavedId());
+                    Navigation.findNavController(binding.getRoot())
+                            .navigate(R.id.action_nav_recipes_to_nav_add_recipe, args);
+                }
+        );
         binding.recipesRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recipesRecycler.setAdapter(adapter);
 
@@ -52,35 +58,7 @@ public class RecipesFragment extends Fragment {
             binding.recipesRecycler.setVisibility(hasResults ? View.VISIBLE : View.GONE);
             binding.emptyIcon.setVisibility(hasResults ? View.GONE : View.VISIBLE);
             binding.emptyMessage.setVisibility(hasResults ? View.GONE : View.VISIBLE);
-            if (!hasResults) {
-                binding.emptyMessage.setText(aiAvailable
-                        ? R.string.empty_recipes_message
-                        : R.string.ai_unavailable_recipes);
-            }
         });
-
-        viewModel.getIsLoading().observe(getViewLifecycleOwner(), loading -> {
-            binding.progress.setVisibility(loading ? View.VISIBLE : View.GONE);
-            // Never re-enable the button when AI is unavailable
-            binding.btnGenerateRecipes.setEnabled(!loading && aiAvailable);
-        });
-
-        viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null && !error.isEmpty()
-                    && !error.equals("on_device_initializing")
-                    && !error.equals("on_device_unavailable")) {
-                Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_LONG)
-                        .setAction("Retry", v -> viewModel.generateRecipes())
-                        .show();
-            }
-        });
-
-        // Disable generate button immediately if AI is not available
-        if (!aiAvailable) {
-            binding.btnGenerateRecipes.setEnabled(false);
-        }
-
-        binding.btnGenerateRecipes.setOnClickListener(v -> viewModel.generateRecipes());
 
         binding.etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}

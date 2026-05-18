@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="start"
+    android:orientation="vertical"
     android:padding="4dp">
 
     <TextView
@@ -15,5 +16,14 @@
         android:paddingHorizontal="12dp"
         android:paddingVertical="8dp"
         android:textColor="?attr/colorOnSurfaceVariant" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/chip_save_recipe"
+        style="@style/Widget.Material3.Chip.Suggestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/action_save_as_recipe"
+        android:visibility="gone" />
 
 </LinearLayout>

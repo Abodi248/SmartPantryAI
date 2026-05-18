@@ -13,6 +13,7 @@ import androidx.navigation.Navigation;
 import com.example.smartpantry.R;
 import com.example.smartpantry.databinding.FragmentAddRecipeBinding;
 import com.example.smartpantry.databinding.ItemDynamicRowBinding;
+import com.example.smartpantry.model.Recipe;
 import com.example.smartpantry.viewmodel.RecipesViewModel;
 import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
@@ -20,8 +21,11 @@ import java.util.List;
 
 public class AddRecipeFragment extends Fragment {
 
+    public static final String ARG_RECIPE_ID = "recipe_id";
+
     private FragmentAddRecipeBinding binding;
     private RecipesViewModel viewModel;
+    private long editingRecipeId = -1L;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -34,27 +38,63 @@ public class AddRecipeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel = new ViewModelProvider(requireActivity())
-                .get(RecipesViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(RecipesViewModel.class);
 
+        if (getArguments() != null) {
+            editingRecipeId = getArguments().getLong(ARG_RECIPE_ID, -1L);
+        }
+
+        boolean editMode = editingRecipeId != -1L;
+        binding.toolbar.setTitle(editMode ? R.string.title_edit_recipe : R.string.title_add_recipe);
         binding.toolbar.setNavigationIcon(R.drawable.ic_nav_back);
         binding.toolbar.setNavigationContentDescription(R.string.cd_navigate_back);
         binding.toolbar.setNavigationOnClickListener(v ->
                 Navigation.findNavController(v).navigateUp());
 
-        addIngredientRow();
-        addStepRow();
+        if (editMode) {
+            viewModel.getRecipeById(editingRecipeId).observe(getViewLifecycleOwner(), recipe -> {
+                if (recipe != null && binding.etRecipeTitle.getText() != null
+                        && binding.etRecipeTitle.getText().toString().isEmpty()) {
+                    prefillForm(recipe);
+                }
+            });
+        } else {
+            addIngredientRow(null);
+            addStepRow(null);
+        }
 
-        binding.btnAddIngredientRow.setOnClickListener(v -> addIngredientRow());
-        binding.btnAddStepRow.setOnClickListener(v -> addStepRow());
-
+        binding.btnAddIngredientRow.setOnClickListener(v -> addIngredientRow(null));
+        binding.btnAddStepRow.setOnClickListener(v -> addStepRow(null));
         binding.btnSaveRecipe.setOnClickListener(v -> saveRecipe());
     }
 
-    private void addIngredientRow() {
+    private void prefillForm(Recipe recipe) {
+        binding.etRecipeTitle.setText(recipe.getTitle());
+        binding.containerIngredients.removeAllViews();
+        binding.containerSteps.removeAllViews();
+
+        if (recipe.getIngredients().isEmpty()) {
+            addIngredientRow(null);
+        } else {
+            for (String ing : recipe.getIngredients()) addIngredientRow(ing);
+        }
+
+        if (recipe.getSteps().isEmpty()) {
+            addStepRow(null);
+        } else {
+            for (String step : recipe.getSteps()) addStepRow(step);
+        }
+
+        if (!recipe.getTips().isEmpty()) {
+            binding.etTips.setText(recipe.getTips());
+        }
+    }
+
+    private void addIngredientRow(@Nullable String initialText) {
         ItemDynamicRowBinding row = ItemDynamicRowBinding.inflate(
                 getLayoutInflater(), binding.containerIngredients, false);
         row.inputRow.setHint(getString(R.string.hint_ingredient_name));
+        if (initialText != null) row.etRow.setText(initialText);
         row.btnRemoveRow.setOnClickListener(v -> {
             if (binding.containerIngredients.getChildCount() > 1) {
                 binding.containerIngredients.removeView(row.getRoot());
@@ -63,10 +103,11 @@ public class AddRecipeFragment extends Fragment {
         binding.containerIngredients.addView(row.getRoot());
     }
 
-    private void addStepRow() {
+    private void addStepRow(@Nullable String initialText) {
         ItemDynamicRowBinding row = ItemDynamicRowBinding.inflate(
                 getLayoutInflater(), binding.containerSteps, false);
         row.inputRow.setHint(getString(R.string.hint_step_description));
+        if (initialText != null) row.etRow.setText(initialText);
         row.btnRemoveRow.setOnClickListener(v -> {
             if (binding.containerSteps.getChildCount() > 1) {
                 binding.containerSteps.removeView(row.getRoot());
@@ -86,13 +127,25 @@ public class AddRecipeFragment extends Fragment {
 
         List<String> ingredients = collectRows(binding.containerIngredients);
         List<String> steps = collectRows(binding.containerSteps);
+        String tips = binding.etTips.getText() != null
+                ? binding.etTips.getText().toString().trim() : "";
 
         if (ingredients.isEmpty()) {
             Snackbar.make(binding.getRoot(), R.string.error_add_ingredient, Snackbar.LENGTH_SHORT).show();
             return;
         }
 
-        viewModel.saveRecipe(title, ingredients, steps);
+        if (editingRecipeId != -1L) {
+            Recipe updated = new Recipe(title, ingredients, steps, new ArrayList<>());
+            updated.setSavedId(editingRecipeId);
+            updated.setSaved(true);
+            updated.setUserCreated(true);
+            updated.setTips(tips);
+            viewModel.updateRecipe(updated);
+        } else {
+            viewModel.saveRecipe(title, ingredients, steps, tips);
+        }
+
         Navigation.findNavController(binding.getRoot()).navigateUp();
     }
 

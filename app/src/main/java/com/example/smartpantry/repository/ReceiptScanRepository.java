@@ -3,6 +3,8 @@ package com.example.smartpantry.repository;
 import android.app.Application;
 import android.net.Uri;
 import android.util.Log;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import com.example.smartpantry.model.Ingredient;
 import com.example.smartpantry.network.LocalAiClient;
 import com.example.smartpantry.utils.AiCapabilityChecker;
@@ -23,6 +25,7 @@ public class ReceiptScanRepository {
     private final Application application;
     private final LocalAiClient localAiClient;
     private final boolean aiAvailable;
+    private final MutableLiveData<Boolean> isInitializing = new MutableLiveData<>(false);
 
     public ReceiptScanRepository(Application application) {
         this.application = application;
@@ -30,10 +33,12 @@ public class ReceiptScanRepository {
         boolean modelPresent = AiCapabilityChecker.isModelPresent(LocalAiClient.DEFAULT_MODEL_PATH);
 
         if (capable && modelPresent) {
-            localAiClient = new LocalAiClient(
-                    application,
-                    LocalAiClient.DEFAULT_MODEL_PATH,
-                    backend -> Log.i(TAG, "Receipt AI backend: " + backend.getLabel()));
+            isInitializing.setValue(true);
+            localAiClient = LocalAiClient.getInstance(application);
+            localAiClient.addOnReadyListener(backend -> {
+                Log.i(TAG, "Receipt AI backend: " + backend.getLabel());
+                isInitializing.postValue(false);
+            });
             aiAvailable = true;
         } else {
             localAiClient = null;
@@ -43,6 +48,8 @@ public class ReceiptScanRepository {
     }
 
     public boolean isAiAvailable() { return aiAvailable; }
+
+    public LiveData<Boolean> getIsInitializing() { return isInitializing; }
 
     public void parseReceiptAsync(Uri imageUri,
                                    Consumer<List<Ingredient>> onSuccess,
@@ -105,7 +112,4 @@ public class ReceiptScanRepository {
                 });
     }
 
-    public void shutdown() {
-        if (localAiClient != null) localAiClient.close();
-    }
 }

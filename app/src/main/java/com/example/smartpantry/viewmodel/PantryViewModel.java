@@ -48,6 +48,8 @@ public class PantryViewModel extends AndroidViewModel {
 
     public boolean isAiAvailable() { return receiptScanRepository.isAiAvailable(); }
 
+    public LiveData<Boolean> getIsAiInitializing() { return receiptScanRepository.getIsInitializing(); }
+
     public LiveData<List<Ingredient>> getIngredients() { return filteredIngredients; }
 
     public void setSearchQuery(String query) { searchQuery.setValue(query); }
@@ -99,6 +101,5 @@ public class PantryViewModel extends AndroidViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        receiptScanRepository.shutdown();
     }
 }

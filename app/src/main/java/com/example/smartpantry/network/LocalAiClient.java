@@ -6,6 +6,8 @@ import com.google.mediapipe.tasks.genai.llminference.LlmInference;
 import com.google.mediapipe.tasks.genai.llminference.LlmInference.LlmInferenceOptions;
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession;
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession.LlmInferenceSessionOptions;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -14,10 +16,9 @@ public class LocalAiClient {
 
     private static final String TAG = "LocalAiClient";
 
-    public static final String DEFAULT_MODEL_PATH =
-            "/data/local/tmp/gemma-2b-it-gpu-int4.bin";
+    public static final String DEFAULT_MODEL_PATH = "/data/local/tmp/gemma-2b-it-gpu-int4.bin";
 
-    private static final int MAX_TOKENS = 1024;
+    private static final int MAX_TOKENS = 4096;
     private static final int TOP_K = 40;
     private static final float TEMPERATURE = 0.8f;
 
@@ -27,66 +28,79 @@ public class LocalAiClient {
         NONE("Unavailable");
 
         private final String label;
-
         BackendType(String label) { this.label = label; }
-
         public String getLabel() { return label; }
     }
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static volatile LocalAiClient instance;
 
-    private LlmInference llmInference;
-    private LlmInferenceSessionOptions sessionOptions;
+    public static LocalAiClient getInstance(Context context) {
+        if (instance == null) {
+            synchronized (LocalAiClient.class) {
+                if (instance == null) {
+                    instance = new LocalAiClient(context.getApplicationContext());
+                }
+            }
+        }
+        return instance;
+    }
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Object listenerLock = new Object();
+    private final List<Consumer<BackendType>> pendingListeners = new ArrayList<>();
 
     private volatile BackendType backendType = BackendType.NONE;
     private volatile boolean ready = false;
 
-    public LocalAiClient(Context context, String modelPath, Consumer<BackendType> onReady) {
-        Context appContext = context.getApplicationContext();
-        executor.execute(() -> {
-            sessionOptions = LlmInferenceSessionOptions.builder()
-                    .setTopK(TOP_K)
-                    .setTemperature(TEMPERATURE)
-                    .build();
+    private LlmInference llmInference;
+    private LlmInferenceSessionOptions sessionOptions;
 
-            BackendType result = tryInit(appContext, modelPath, LlmInference.Backend.GPU);
-            if (result == BackendType.NONE) {
-                result = tryInit(appContext, modelPath, LlmInference.Backend.CPU);
+    private LocalAiClient(Context context) {
+        executor.execute(() -> initInBackground(context));
+    }
+
+    private void initInBackground(Context context) {
+        sessionOptions = LlmInferenceSessionOptions.builder()
+                .setTopK(TOP_K)
+                .setTemperature(TEMPERATURE)
+                .build();
+
+        BackendType result = tryInit(context, DEFAULT_MODEL_PATH, LlmInference.Backend.GPU);
+        if (result == BackendType.NONE) {
+            result = tryInit(context, DEFAULT_MODEL_PATH, LlmInference.Backend.CPU);
+        }
+
+        final BackendType finalResult = result;
+        List<Consumer<BackendType>> toNotify;
+        synchronized (listenerLock) {
+            backendType = finalResult;
+            ready = (finalResult != BackendType.NONE);
+            toNotify = new ArrayList<>(pendingListeners);
+            pendingListeners.clear();
+        }
+        Log.i(TAG, "Init complete — backend: " + finalResult.getLabel());
+        for (Consumer<BackendType> cb : toNotify) {
+            cb.accept(finalResult);
+        }
+    }
+
+    public void addOnReadyListener(Consumer<BackendType> listener) {
+        boolean alreadyReady;
+        synchronized (listenerLock) {
+            alreadyReady = ready;
+            if (!alreadyReady) {
+                pendingListeners.add(listener);
             }
-            backendType = result;
-            ready = (result != BackendType.NONE);
-            Log.i(TAG, "Init complete — backend: " + result.getLabel());
-            onReady.accept(result);
-        });
+        }
+        if (alreadyReady) {
+            executor.execute(() -> listener.accept(backendType));
+        }
     }
 
     public boolean isReady() { return ready; }
 
     public BackendType getBackendType() { return backendType; }
 
-    // Backend init
-
-    private BackendType tryInit(Context context, String modelPath, LlmInference.Backend backend) {
-        BackendType target = (backend == LlmInference.Backend.GPU)
-                ? BackendType.GPU : BackendType.CPU;
-        Log.i(TAG, target.name() + " init start — " + modelPath);
-        try {
-            LlmInferenceOptions options = LlmInferenceOptions.builder()
-                    .setModelPath(modelPath)
-                    .setMaxTokens(MAX_TOKENS)
-                    .setPreferredBackend(backend)
-                    .build();
-            llmInference = LlmInference.createFromOptions(context, options);
-            Log.i(TAG, target.name() + " init success");
-            return target;
-        } catch (Exception e) {
-            Log.w(TAG, target.name() + " init failed ("
-                    + e.getClass().getSimpleName() + "): " + e.getMessage());
-            releaseEngine();
-            return BackendType.NONE;
-        }
-    }
-    // Inference
     public void generateAsync(String prompt,
                                Consumer<String> onResult,
                                Consumer<String> onError) {
@@ -114,10 +128,26 @@ public class LocalAiClient {
             }
         });
     }
-    public void close() {
-        ready = false;
-        executor.execute(this::releaseEngine);
-        executor.shutdown();
+
+    private BackendType tryInit(Context context, String modelPath, LlmInference.Backend backend) {
+        BackendType target = (backend == LlmInference.Backend.GPU)
+                ? BackendType.GPU : BackendType.CPU;
+        Log.i(TAG, target.name() + " init start — " + modelPath);
+        try {
+            LlmInferenceOptions options = LlmInferenceOptions.builder()
+                    .setModelPath(modelPath)
+                    .setMaxTokens(MAX_TOKENS)
+                    .setPreferredBackend(backend)
+                    .build();
+            llmInference = LlmInference.createFromOptions(context, options);
+            Log.i(TAG, target.name() + " init success");
+            return target;
+        } catch (Exception e) {
+            Log.w(TAG, target.name() + " init failed ("
+                    + e.getClass().getSimpleName() + "): " + e.getMessage());
+            releaseEngine();
+            return BackendType.NONE;
+        }
     }
 
     private void releaseEngine() {

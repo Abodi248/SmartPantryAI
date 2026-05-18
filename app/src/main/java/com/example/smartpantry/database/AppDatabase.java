@@ -9,8 +9,9 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(
-    entities = {IngredientEntity.class, MealPlanEntity.class, SavedRecipeEntity.class, UserEntity.class},
-    version = 4,
+    entities = {IngredientEntity.class, MealPlanEntity.class, SavedRecipeEntity.class,
+                UserEntity.class, ChatMessageEntity.class},
+    version = 6,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -21,6 +22,29 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract MealPlanDao mealPlanDao();
     public abstract SavedRecipeDao savedRecipeDao();
     public abstract UserDao userDao();
+    public abstract ChatMessageDao chatMessageDao();
+
+    static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL(
+                "CREATE TABLE IF NOT EXISTS chat_messages ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+                + "role TEXT NOT NULL,"
+                + "text TEXT NOT NULL,"
+                + "timestamp INTEGER NOT NULL)"
+            );
+        }
+    };
+
+    static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL(
+                "ALTER TABLE saved_recipes ADD COLUMN tips TEXT NOT NULL DEFAULT ''"
+            );
+        }
+    };
 
     static final Migration MIGRATION_3_4 = new Migration(3, 4) {
         @Override
@@ -75,7 +99,8 @@ public abstract class AppDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             AppDatabase.class,
                             "smartpantry.db"
-                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build();
+                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
+                            MIGRATION_5_6).build();
                 }
             }
         }

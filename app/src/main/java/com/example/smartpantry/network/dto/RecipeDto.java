@@ -16,4 +16,7 @@ public class RecipeDto {
 
     @SerializedName("missing")
     public List<String> missing;
+
+    @SerializedName("tips")
+    public String tips;
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartPantry AI</string>
+    <string name="app_name">RecipedTower</string>
 
     <!-- Bottom nav tab labels -->
     <string name="tab_home">Home</string>
@@ -85,12 +85,16 @@
 
     <!-- Add recipe -->
     <string name="title_add_recipe">New Recipe</string>
+    <string name="title_edit_recipe">Edit Recipe</string>
     <string name="hint_recipe_title">Recipe title *</string>
     <string name="hint_step_description">Step description</string>
+    <string name="hint_tips">Cooking tips, substitutions, notes…</string>
+    <string name="label_tips">Tips</string>
     <string name="action_add_row">Add</string>
     <string name="action_save_recipe">Save Recipe</string>
     <string name="chip_my_recipe">My Recipe</string>
     <string name="error_add_ingredient">Add at least one ingredient</string>
+    <string name="cd_edit_recipe">Edit recipe</string>
 
     <!-- Search -->
     <string name="hint_search_pantry">Search pantry…</string>
@@ -120,6 +124,13 @@
 
     <!-- Misc -->
     <string name="msg_saved">Saved</string>
+
+    <!-- Chat -->
+    <string name="action_save_as_recipe">Save as Recipe</string>
+    <string name="msg_recipe_saved">Recipe saved</string>
+    <string name="action_undo">Undo</string>
+    <string name="cd_clear_chat_history">Clear chat history</string>
+    <string name="msg_chat_cleared">Chat history cleared</string>
 
     <!-- On-device AI unavailability messages -->
     <string name="ai_unavailable_chat">AI features require the on-device model to be set up. Please follow the setup guide in the README.</string>

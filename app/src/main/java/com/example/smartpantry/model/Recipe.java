@@ -27,8 +27,12 @@ public class Recipe {
     public void setSaved(boolean saved) { this.saved = saved; }
     public boolean isUserCreated() { return userCreated; }
     public void setUserCreated(boolean userCreated) { this.userCreated = userCreated; }
+    private String tips = "";
+
     public String getTitle() { return title; }
     public List<String> getIngredients() { return ingredients; }
     public List<String> getSteps() { return steps; }
     public List<String> getMissingIngredients() { return missingIngredients; }
+    public String getTips() { return tips != null ? tips : ""; }
+    public void setTips(String tips) { this.tips = tips != null ? tips : ""; }
 }

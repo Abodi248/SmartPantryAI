@@ -1,6 +1,9 @@
 package com.example.smartpantry.repository;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import com.example.smartpantry.database.AppDatabase;
@@ -15,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class SavedRecipeRepository {
 
@@ -31,12 +35,7 @@ public class SavedRecipeRepository {
             List<Recipe> list = new ArrayList<>();
             if (entities == null) return list;
             for (SavedRecipeEntity e : entities) {
-                List<String> ingredients = parseJson(e.ingredientsJson);
-                List<String> steps = parseJson(e.stepsJson);
-                Recipe recipe = new Recipe(e.title, ingredients, steps, Collections.emptyList());
-                recipe.setSavedId(e.id);
-                recipe.setSaved(true);
-                recipe.setUserCreated(e.isUserCreated == 1);
+                Recipe recipe = entityToRecipe(e);
                 list.add(recipe);
             }
             return list;
@@ -46,26 +45,48 @@ public class SavedRecipeRepository {
     public LiveData<List<Recipe>> getAll() { return savedRecipes; }
 
     public LiveData<Recipe> getById(long id) {
-        return Transformations.map(dao.getById(id), e -> {
-            if (e == null) return null;
-            Recipe r = new Recipe(e.title, parseJson(e.ingredientsJson), parseJson(e.stepsJson),
-                    Collections.emptyList());
-            r.setSavedId(e.id);
-            r.setSaved(true);
-            r.setUserCreated(e.isUserCreated == 1);
-            return r;
-        });
+        return Transformations.map(dao.getById(id), e -> e == null ? null : entityToRecipe(e));
     }
 
     public void insert(String title, List<String> ingredients, List<String> steps,
-                       boolean isUserCreated) {
+                       String tips, boolean isUserCreated) {
+        insert(title, ingredients, steps, tips, isUserCreated, null);
+    }
+
+    public void insert(String title, List<String> ingredients, List<String> steps,
+                       String tips, boolean isUserCreated, @Nullable Consumer<Long> onInserted) {
         executor.execute(() -> {
             SavedRecipeEntity e = new SavedRecipeEntity();
             e.title = title;
             e.ingredientsJson = gson.toJson(ingredients);
             e.stepsJson = gson.toJson(steps);
+            e.tips = tips != null ? tips : "";
             e.isUserCreated = isUserCreated ? 1 : 0;
-            dao.insert(e);
+            long newId = dao.insert(e);
+            if (onInserted != null) {
+                new Handler(Looper.getMainLooper()).post(() -> onInserted.accept(newId));
+            }
+        });
+    }
+
+    public void deleteById(long id) {
+        executor.execute(() -> {
+            SavedRecipeEntity e = new SavedRecipeEntity();
+            e.id = id;
+            dao.delete(e);
+        });
+    }
+
+    public void update(Recipe recipe) {
+        executor.execute(() -> {
+            SavedRecipeEntity e = new SavedRecipeEntity();
+            e.id = recipe.getSavedId();
+            e.title = recipe.getTitle();
+            e.ingredientsJson = gson.toJson(recipe.getIngredients());
+            e.stepsJson = gson.toJson(recipe.getSteps());
+            e.tips = recipe.getTips();
+            e.isUserCreated = recipe.isUserCreated() ? 1 : 0;
+            dao.update(e);
         });
     }
 
@@ -76,8 +97,20 @@ public class SavedRecipeRepository {
             e.title = recipe.getTitle();
             e.ingredientsJson = gson.toJson(recipe.getIngredients());
             e.stepsJson = gson.toJson(recipe.getSteps());
+            e.tips = recipe.getTips();
+            e.isUserCreated = recipe.isUserCreated() ? 1 : 0;
             dao.delete(e);
         });
+    }
+
+    private Recipe entityToRecipe(SavedRecipeEntity e) {
+        Recipe recipe = new Recipe(e.title, parseJson(e.ingredientsJson), parseJson(e.stepsJson),
+                Collections.emptyList());
+        recipe.setSavedId(e.id);
+        recipe.setSaved(true);
+        recipe.setUserCreated(e.isUserCreated == 1);
+        recipe.setTips(e.tips);
+        return recipe;
     }
 
     private List<String> parseJson(String json) {

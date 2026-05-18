@@ -4,6 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Clear history button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_clear_history"
+        style="@style/Widget.Material3.Button.IconButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:contentDescription="@string/cd_clear_chat_history"
+        app:icon="@android:drawable/ic_menu_delete"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- Backend badge: shows "On-device" or "Cloud" -->
     <com.google.android.material.chip.Chip
         android:id="@+id/tv_backend_badge"
@@ -17,6 +30,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Barrier keeps RecyclerView below whichever header element is taller -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/header_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="btn_clear_history,tv_backend_badge" />
+
     <!-- Message list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chat_recycler"
@@ -28,7 +49,7 @@
         app:layout_constraintBottom_toTopOf="@id/progress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_backend_badge" />
+        app:layout_constraintTop_toBottomOf="@id/header_barrier" />
 
     <!-- Empty state -->
     <TextView
@@ -41,7 +62,7 @@
         app:layout_constraintBottom_toTopOf="@id/progress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_backend_badge" />
+        app:layout_constraintTop_toBottomOf="@id/header_barrier" />
 
     <!-- Loading indicator shown while AI is thinking -->
     <com.google.android.material.progressindicator.CircularProgressIndicator

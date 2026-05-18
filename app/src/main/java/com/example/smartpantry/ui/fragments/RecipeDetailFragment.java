@@ -75,6 +75,15 @@ public class RecipeDetailFragment extends Fragment {
             binding.layoutMissing.setVisibility(View.GONE);
         }
 
+        // Tips
+        String tips = recipe.getTips();
+        if (tips != null && !tips.isEmpty()) {
+            binding.layoutTips.setVisibility(View.VISIBLE);
+            binding.tvTips.setText(tips);
+        } else {
+            binding.layoutTips.setVisibility(View.GONE);
+        }
+
         // Delete FAB — only for persisted recipes
         if (recipe.isSaved()) {
             binding.fabDelete.setVisibility(View.VISIBLE);

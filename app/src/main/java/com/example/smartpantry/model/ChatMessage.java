@@ -14,6 +14,12 @@ public class ChatMessage {
         this.timestampMs = System.currentTimeMillis();
     }
 
+    public ChatMessage(String text, Role role, long timestampMs) {
+        this.text = text;
+        this.role = role;
+        this.timestampMs = timestampMs;
+    }
+
     public String getText() { return text; }
     public Role getRole() { return role; }
     public long getTimestampMs() { return timestampMs; }

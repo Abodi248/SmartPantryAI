@@ -31,19 +31,14 @@ public class HomeViewModel extends AndroidViewModel {
 
     private final MutableLiveData<String> selectedDate = new MutableLiveData<>(todayIso());
 
-    // Pantry item count
     private final LiveData<Integer> pantryCount;
 
-    // Saved-recipe count where all ingredients are available in pantry
     private final MediatorLiveData<Integer> readyRecipeCount = new MediatorLiveData<>();
 
-    // Meals for the selected day (for the week strip detail section)
     private LiveData<List<MealPlan>> mealsForSelectedDate;
 
-    // Upcoming meal-plan entries for the next 7 days (used by Home summary)
     private final LiveData<List<MealPlan>> upcomingMeals;
 
-    // Dates that have at least one meal planned in the current week window
     private final LiveData<List<String>> datesWithMeals;
 
     public HomeViewModel(@NonNull Application application) {
@@ -71,7 +66,6 @@ public class HomeViewModel extends AndroidViewModel {
                 date -> mealPlanRepository.getByDate(date));
     }
 
-    // Exposed LiveData
     public LiveData<Integer> getPantryCount() { return pantryCount; }
     public LiveData<Integer> getReadyRecipeCount() { return readyRecipeCount; }
     public LiveData<List<Recipe>> getSavedRecipes() { return savedRecipeRepository.getAll(); }
@@ -92,8 +86,6 @@ public class HomeViewModel extends AndroidViewModel {
         mealPlanRepository.delete(mealPlan);
     }
 
-    // Helpers
-
     private void recalcReady(List<Ingredient> pantry, List<Recipe> saved) {
         if (pantry == null || saved == null) {
             readyRecipeCount.setValue(0);
@@ -105,7 +97,7 @@ public class HomeViewModel extends AndroidViewModel {
         int count = 0;
         for (Recipe recipe : saved) {
             List<String> recipeIngredients = recipe.getIngredients();
-            if (recipeIngredients.isEmpty()) { count++; continue; }
+            if (recipeIngredients.isEmpty()) continue;
             boolean allFound = true;
             for (String ri : recipeIngredients) {
                 String riLower = ri.toLowerCase();

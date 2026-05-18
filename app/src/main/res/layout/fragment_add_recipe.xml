@@ -111,6 +111,32 @@
                 android:layout_marginBottom="24dp"
                 android:orientation="vertical" />
 
+            <!-- Tips section -->
+            <TextView
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_tips" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_tips"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:hint="@string/hint_tips">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_tips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:minLines="3" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
             <!-- Save button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save_recipe"
